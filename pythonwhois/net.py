@@ -17,7 +17,7 @@ def get_whois_raw(domain, server="", previous=None, rfc3490=True, never_cut=Fals
         ".org.za": "org-whois.registry.net.za",
         ".net.za": "net-whois.registry.net.za",
         ".co.za": "whois.registry.net.za",
-        # The following is a bit hacky, but IANA won't return the right answer for example.com because it's a direct registration.
+        # IANA won't return the right answer for example.com because it's a direct registration.
         "example.com": "whois.verisign-grs.com"
     }
 
@@ -101,4 +101,10 @@ def whois_request(domain, server, port=43):
         if len(data) == 0:
             break
         buff += data
-    return buff.decode("utf-8")
+    encodings = ("utf-8", "iso-8859-1")
+    for encoding in encodings:  # This should probably not be a permanent solution.
+        try:
+            return buff.decode(encoding)
+        except ValueError:
+            pass
+    raise ValueError("Could not decode whois response from {server}".format(server=server))
